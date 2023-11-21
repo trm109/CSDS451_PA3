@@ -4,8 +4,12 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 # You should implement these for CIFAR-10. HINT: The dataset may be accessed with Torchvision.
-training_data = torchvision.datasets.CIFAR10(root = './data', train = True, download = True, transform = torchvision.transforms.ToTensor())
-training_loader = DataLoader(training_data, batch_size = 4, shuffle = True, num_workers = 2)
+training_data = torchvision.datasets.CIFAR10(root = './data', train = True, download = True, transform = torchvision.transforms.Compose([
+    torchvision.transforms.ToTensor(),
+    torchvision.transforms.Resize((32, 32)),
+    torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+]))
+training_loader = DataLoader(training_data, batch_size = 64, shuffle = True, num_workers = 2)
 
 # The cnn model class.
 class EX_CNN(nn.Module):
@@ -13,61 +17,110 @@ class EX_CNN(nn.Module):
     def __init__(self, **kwargs):
         super(EX_CNN, self).__init__()
         self.convolution_layers = nn.Sequential(
-            nn.Conv2d(in_channels = 1, out_channels = 32, 
-                        kernel_size = (3, 3), stride = 1), 
-            nn.ReLU(), 
-            nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-            nn.BatchNorm2d(num_features = 32), 
+                #nn.Conv2d(in_channels = 1, out_channels = 32, 
+                #            kernel_size = (3, 3), stride = 1), 
+                #nn.ReLU(), 
+                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
+                #nn.BatchNorm2d(num_features = 32), 
 
-            nn.Conv2d(in_channels = 32, out_channels = 32, 
-                        kernel_size = (3, 3), stride = 1), 
-            nn.ReLU(), 
-            nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-            nn.BatchNorm2d(num_features = 32), 
+                #nn.Conv2d(in_channels = 32, out_channels = 32, 
+                #            kernel_size = (3, 3), stride = 1), 
+                #nn.ReLU(), 
+                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
+                #nn.BatchNorm2d(num_features = 32), 
 
-            nn.Conv2d(in_channels = 32, out_channels = 32, 
-                        kernel_size = (3, 3), stride = 1), 
-            nn.ReLU(), 
-            nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-            nn.BatchNorm2d(num_features = 32), 
+                #nn.Conv2d(in_channels = 32, out_channels = 32, 
+                #            kernel_size = (3, 3), stride = 1), 
+                #nn.ReLU(), 
+                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
+                #nn.BatchNorm2d(num_features = 32), 
 
-            nn.Conv2d(in_channels = 32, out_channels = 32, 
-                        kernel_size = (3, 3), stride = 1), 
-            nn.ReLU(), 
-            nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-            nn.BatchNorm2d(num_features = 32), 
+                #nn.Conv2d(in_channels = 32, out_channels = 32, 
+                #            kernel_size = (3, 3), stride = 1), 
+                #nn.ReLU(), 
+                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
+                #nn.BatchNorm2d(num_features = 32), 
 
-            nn.Conv2d(in_channels = 32, out_channels = 32, 
-                        kernel_size = (3, 3), stride = 1), 
-            nn.ReLU(), 
-            nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-            nn.BatchNorm2d(num_features = 32), 
+                #nn.Conv2d(in_channels = 32, out_channels = 32, 
+                #            kernel_size = (3, 3), stride = 1), 
+                #nn.ReLU(), 
+                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
+                #nn.BatchNorm2d(num_features = 32), 
 
-            nn.Conv2d(in_channels = 32, out_channels = 32, 
-                        kernel_size = (3, 3), stride = 1), 
-            nn.ReLU(), 
-            nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
+                #nn.Conv2d(in_channels = 32, out_channels = 32, 
+                #            kernel_size = (3, 3), stride = 1), 
+                #nn.ReLU(), 
+                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
+                #nn.BatchNorm2d(num_features = 32)
+            # Revise to match CIFAR-10
+            nn.Conv2d(in_channels = 3, out_channels = 32,
+                    kernel_size = (3, 3), stride = 1, padding = 1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = (2, 2), stride = 2),
+            nn.BatchNorm2d(num_features = 32),
+
+            nn.Conv2d(in_channels = 32, out_channels = 32,
+                    kernel_size = (3, 3), stride = 1, padding = 1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = (2, 2), stride = 2),
+            nn.BatchNorm2d(num_features = 32),
+
+            nn.Conv2d(in_channels = 32, out_channels = 32,
+                    kernel_size = (3, 3), stride = 1, padding = 1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = (2, 2), stride = 2),
+            nn.BatchNorm2d(num_features = 32),
+            
+            nn.Conv2d(in_channels = 32, out_channels = 32,
+                    kernel_size = (3, 3), stride = 1, padding = 1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = (2, 2), stride = 2),
+            nn.BatchNorm2d(num_features = 32),
+            
+            nn.Conv2d(in_channels = 32, out_channels = 32,
+                    kernel_size = (3, 3), stride = 1, padding = 1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = (2, 2), stride = 2),
             nn.BatchNorm2d(num_features = 32)
         )
 
         self.linear_layers = nn.Sequential(
-            nn.Linear(in_features = 3200, out_features = 64), 
-            nn.ReLU(), 
-            nn.BatchNorm1d(num_features = 64), 
+                #nn.Linear(in_features = 3200, out_features = 64), 
+                #nn.ReLU(), 
+                #nn.BatchNorm1d(num_features = 64), 
 
-            nn.Linear(in_features = 64, out_features = 64), 
-            nn.ReLU(), 
-            nn.BatchNorm1d(num_features = 64), 
+                #nn.Linear(in_features = 64, out_features = 64), 
+                #nn.ReLU(), 
+                #nn.BatchNorm1d(num_features = 64), 
 
-            nn.Linear(in_features = 64, out_features = 64), 
-            nn.ReLU(), 
-            nn.BatchNorm1d(num_features = 64), 
+                #nn.Linear(in_features = 64, out_features = 64), 
+                #nn.ReLU(), 
+                #nn.BatchNorm1d(num_features = 64), 
 
-            nn.Linear(in_features = 64, out_features = 64), 
-            nn.ReLU(), 
+                #nn.Linear(in_features = 64, out_features = 64), 
+                #nn.ReLU(), 
+                #nn.BatchNorm1d(num_features = 64),
+                #
+                #nn.Linear(in_features = 64, out_features = 9), 
+                #nn.Sigmoid()
+            # Revise to match CIFAR-10
+            nn.Linear(in_features = 32, out_features = 64),
+            nn.ReLU(),
             nn.BatchNorm1d(num_features = 64),
-            
-            nn.Linear(in_features = 64, out_features = 9), 
+
+            nn.Linear(in_features = 64, out_features = 64),
+            nn.ReLU(),
+            nn.BatchNorm1d(num_features = 64),
+
+            nn.Linear(in_features = 64, out_features = 64),
+            nn.ReLU(),
+            nn.BatchNorm1d(num_features = 64),
+
+            nn.Linear(in_features = 64, out_features = 64),
+            nn.ReLU(),
+            nn.BatchNorm1d(num_features = 64),
+
+            nn.Linear(in_features = 64, out_features = 10),
             nn.Sigmoid()
         )
     
@@ -97,13 +150,21 @@ print("The device that you are using is: ", device)
 # Send the model to the GPU.
 Ex_Net.to(device = device)
 
-# Run your model for "x" epochs.
+# define num of epochs
+x = 2
+
+
+# Train using data parallel strategy (not distributed data parallel).
 for epoch in range(x):
     running_loss = 0.0
 
     # This iterates over the data within an epoch.
     for i, data in enumerate(iterable = training_loader, start = 0):
-        inputs, labels = data['image'].to(device), data['label'].to(device)
+
+        inputs, labels = data
+
+        inputs = inputs.to(device)
+        labels = labels.to(device)
 
         optimizer.zero_grad()
 
@@ -119,5 +180,30 @@ for epoch in range(x):
             print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 20:.3f}')
             running_loss = 0.0
 
+
+
+## Run your model for "x" epochs.
+#for epoch in range(x):
+#    running_loss = 0.0
+#
+#    # This iterates over the data within an epoch.
+#    for i, data in enumerate(iterable = training_loader, start = 0):
+#
+#        inputs, labels = data['image'].to(device), data['label'].to(device)
+#
+#        optimizer.zero_grad()
+#
+#        outputs = Ex_Net(inputs)
+#        loss = criterion(outputs, labels)
+#        loss.backward()
+#        optimizer.step()
+#        
+#        running_loss += loss.item()
+#
+#        # This prints the loss every 20 batches.
+#        if i % 20 == 19:
+#            print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 20:.3f}')
+#            running_loss = 0.0
+#
 # This is just here to let you know that your model has finished training.
 print("Finished training.")
