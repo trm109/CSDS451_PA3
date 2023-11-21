@@ -93,7 +93,12 @@ class EX_CNN_Module(pl.LightningModule):
         outputs = self(inputs)
         loss = criterion(outputs, labels)
 
-        self.log('train_loss', loss, on_step = True, on_epoch = True, prog_bar = True, logger = True)
+        #self.log('train_loss', loss, on_step = True, on_epoch = True, prog_bar = True, logger = True)
+        if batch_idx % 20 == 19:
+            # Print running loss.
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                self.current_epoch, batch_idx * len(inputs), len(training_loader.dataset),
+                100. * batch_idx / len(training_loader), loss.item()))
         return loss
     
 # Instantiate your model.
