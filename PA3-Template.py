@@ -1,5 +1,6 @@
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping
+from pytorch_lightning.callbacks import Callback
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 import torch.nn as nn
@@ -8,10 +9,11 @@ import torchvision
 # You should implement these for CIFAR-10. HINT: The dataset may be accessed with Torchvision.
 training_data = torchvision.datasets.CIFAR10(root = './data', train = True, download = True, transform = torchvision.transforms.Compose([
     torchvision.transforms.ToTensor(),
-    torchvision.transforms.Resize((32, 32)),
+    torchvision.transforms.Resize((32, 32), antialias = True),
     torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ]))
-training_loader = DataLoader(training_data, batch_size = 64, shuffle = True, num_workers = 2)
+# Batch Sizes = 64, 32, 16, 8
+training_loader = DataLoader(training_data, batch_size = int(input("Enter Batch Size:")), shuffle = True, num_workers = 2)
 
 # The cnn model class.
 class EX_CNN_Module(pl.LightningModule):
@@ -93,9 +95,8 @@ class EX_CNN_Module(pl.LightningModule):
 
         self.log('train_loss', loss, on_step = True, on_epoch = True, prog_bar = True, logger = True)
         return loss
-
+    
 # Instantiate your model.
-
 device = ("cuda" if torch.cuda.is_available() else "cpu")
 
 # Create the LightningModule instance
@@ -104,11 +105,8 @@ model = EX_CNN_Module()
 # Define criterion
 criterion = nn.CrossEntropyLoss()
 
-
 # Create the Trainer instance
 trainer = pl.Trainer(max_epochs = 2, accelerator = 'auto')
-
-
 
 # Train the model
 trainer.fit(model, training_loader)
