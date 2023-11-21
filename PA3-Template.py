@@ -1,3 +1,5 @@
+import pytorch_lightning as pl
+from pytorch_lightning.callbacks import EarlyStopping
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 import torch.nn as nn
@@ -12,46 +14,11 @@ training_data = torchvision.datasets.CIFAR10(root = './data', train = True, down
 training_loader = DataLoader(training_data, batch_size = 64, shuffle = True, num_workers = 2)
 
 # The cnn model class.
-class EX_CNN(nn.Module):
+class EX_CNN_Module(pl.LightningModule):
     # Specify the structure of your model.
     def __init__(self, **kwargs):
-        super(EX_CNN, self).__init__()
+        super(EX_CNN_Module, self).__init__()
         self.convolution_layers = nn.Sequential(
-                #nn.Conv2d(in_channels = 1, out_channels = 32, 
-                #            kernel_size = (3, 3), stride = 1), 
-                #nn.ReLU(), 
-                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-                #nn.BatchNorm2d(num_features = 32), 
-
-                #nn.Conv2d(in_channels = 32, out_channels = 32, 
-                #            kernel_size = (3, 3), stride = 1), 
-                #nn.ReLU(), 
-                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-                #nn.BatchNorm2d(num_features = 32), 
-
-                #nn.Conv2d(in_channels = 32, out_channels = 32, 
-                #            kernel_size = (3, 3), stride = 1), 
-                #nn.ReLU(), 
-                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-                #nn.BatchNorm2d(num_features = 32), 
-
-                #nn.Conv2d(in_channels = 32, out_channels = 32, 
-                #            kernel_size = (3, 3), stride = 1), 
-                #nn.ReLU(), 
-                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-                #nn.BatchNorm2d(num_features = 32), 
-
-                #nn.Conv2d(in_channels = 32, out_channels = 32, 
-                #            kernel_size = (3, 3), stride = 1), 
-                #nn.ReLU(), 
-                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-                #nn.BatchNorm2d(num_features = 32), 
-
-                #nn.Conv2d(in_channels = 32, out_channels = 32, 
-                #            kernel_size = (3, 3), stride = 1), 
-                #nn.ReLU(), 
-                #nn.MaxPool2d(kernel_size = (2, 2), stride = 2), 
-                #nn.BatchNorm2d(num_features = 32)
             # Revise to match CIFAR-10
             nn.Conv2d(in_channels = 3, out_channels = 32,
                     kernel_size = (3, 3), stride = 1, padding = 1),
@@ -85,24 +52,6 @@ class EX_CNN(nn.Module):
         )
 
         self.linear_layers = nn.Sequential(
-                #nn.Linear(in_features = 3200, out_features = 64), 
-                #nn.ReLU(), 
-                #nn.BatchNorm1d(num_features = 64), 
-
-                #nn.Linear(in_features = 64, out_features = 64), 
-                #nn.ReLU(), 
-                #nn.BatchNorm1d(num_features = 64), 
-
-                #nn.Linear(in_features = 64, out_features = 64), 
-                #nn.ReLU(), 
-                #nn.BatchNorm1d(num_features = 64), 
-
-                #nn.Linear(in_features = 64, out_features = 64), 
-                #nn.ReLU(), 
-                #nn.BatchNorm1d(num_features = 64),
-                #
-                #nn.Linear(in_features = 64, out_features = 9), 
-                #nn.Sigmoid()
             # Revise to match CIFAR-10
             nn.Linear(in_features = 32, out_features = 64),
             nn.ReLU(),
@@ -130,80 +79,37 @@ class EX_CNN(nn.Module):
         x = torch.flatten(input = x, start_dim = 1)
         x = self.linear_layers(x)
         return x
+    # Define optimizer.
+    def configure_optimizers(self):
+        optimizer = optim.Adam(params=self.parameters(), lr=0.001)
+        return optimizer
+    # Define training step.
+    def training_step(self, batch, batch_idx):
+        inputs, labels = batch
+        inputs, labels = inputs.to(device), labels.to(device)
+
+        outputs = self(inputs)
+        loss = criterion(outputs, labels)
+
+        self.log('train_loss', loss, on_step = True, on_epoch = True, prog_bar = True, logger = True)
+        return loss
 
 # Instantiate your model.
-Ex_Net = EX_CNN()
 
-# If you want, you can print the structure of your model.
-print(Ex_Net)
-
-# Specify the loss function and optimizer that you will use.
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(params = Ex_Net.parameters(), lr = 0.001)
-
-# Use an Nvidia GPU if available, otherwise use the CPU.
 device = ("cuda" if torch.cuda.is_available() else "cpu")
 
-# You can print out the device that you are using to verify that it is a GPU.
-print("The device that you are using is: ", device)
+# Create the LightningModule instance
+model = EX_CNN_Module()
 
-# Send the model to the GPU.
-Ex_Net.to(device = device)
-
-# define num of epochs
-x = 2
+# Define criterion
+criterion = nn.CrossEntropyLoss()
 
 
-# Train using data parallel strategy (not distributed data parallel).
-for epoch in range(x):
-    running_loss = 0.0
-
-    # This iterates over the data within an epoch.
-    for i, data in enumerate(iterable = training_loader, start = 0):
-
-        inputs, labels = data
-
-        inputs = inputs.to(device)
-        labels = labels.to(device)
-
-        optimizer.zero_grad()
-
-        outputs = Ex_Net(inputs)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-        
-        running_loss += loss.item()
-
-        # This prints the loss every 20 batches.
-        if i % 20 == 19:
-            print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 20:.3f}')
-            running_loss = 0.0
+# Create the Trainer instance
+trainer = pl.Trainer(max_epochs = 2, accelerator = 'auto')
 
 
 
-## Run your model for "x" epochs.
-#for epoch in range(x):
-#    running_loss = 0.0
-#
-#    # This iterates over the data within an epoch.
-#    for i, data in enumerate(iterable = training_loader, start = 0):
-#
-#        inputs, labels = data['image'].to(device), data['label'].to(device)
-#
-#        optimizer.zero_grad()
-#
-#        outputs = Ex_Net(inputs)
-#        loss = criterion(outputs, labels)
-#        loss.backward()
-#        optimizer.step()
-#        
-#        running_loss += loss.item()
-#
-#        # This prints the loss every 20 batches.
-#        if i % 20 == 19:
-#            print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 20:.3f}')
-#            running_loss = 0.0
-#
-# This is just here to let you know that your model has finished training.
+# Train the model
+trainer.fit(model, training_loader)
 print("Finished training.")
